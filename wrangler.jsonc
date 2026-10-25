@@ -1,0 +1,74 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "telegram-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "traces": { "enabled": true },
+  },
+
+  // The only thing to fill in. Get it from @BotFather. `ALLOWED_USER_IDS` is
+  // optional: leave it out and anyone may connect (each person still sees only
+  // their own chat with the bot and their own groups).
+  "secrets": {
+    "required": ["BOT_TOKEN"],
+  },
+
+  "vars": {
+    // Messages older than this are deleted by the daily cron.
+    "RETENTION_DAYS": "14",
+  },
+
+  // Created on first deploy and found by name afterwards; no id to copy anywhere.
+  // The schema is applied by the Worker itself on first use, see src/schema.ts.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "telegram-mcp","database_id": "1079762b-22c2-4b0d-8331-88580c9167dd",
+    },
+  ],
+
+  // Daily: delete messages past retention, and re-register the webhook if it drifted.
+  // Every 5 minutes: fail relay jobs nobody picked up (src/relay.ts).
+  "triggers": {
+    "crons": ["17 3 * * *", "*/5 * * * *"],
+  },
+
+  // Branch builds on Cloudflare run `wrangler preview`, which inherits no
+  // bindings or secrets from the settings above. Previews get no database and
+  // no bot token on purpose: one holding the production bot's token could
+  // take its webhook, and one on the production database would act on real
+  // chats. Such a preview only builds and answers /health; to make it a
+  // working stand, give it its own test bot (`wrangler preview secret put
+  // BOT_TOKEN`) and its own D1 database here.
+  "previews": {
+    "vars": {
+      "RETENTION_DAYS": "14",
+    },
+  },
+
+  // Rate limiters. Nothing to provision. Counting is per-colo with a 60 s
+  // window, so these are a ceiling on abuse rather than a guarantee.
+  "ratelimits": [
+    // /token, /register and the Telegram login callback, per client IP.
+    {
+      "name": "AUTH_LIMIT",
+      "namespace_id": "2001",
+      "simple": { "limit": 20, "period": 60 },
+    },
+    // MCP, per user. A conversation fires a few calls a turn; this caps a runaway loop.
+    {
+      "name": "MCP_LIMIT",
+      "namespace_id": "2002",
+      "simple": { "limit": 120, "period": 60 },
+    },
+    // File upload and download links, per client IP.
+    {
+      "name": "FILE_LIMIT",
+      "namespace_id": "2003",
+      "simple": { "limit": 30, "period": 60 },
+    },
+  ],
+}

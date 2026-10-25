@@ -1,0 +1,5 @@
+# Token from @BotFather.
+BOT_TOKEN=
+# Optional. Comma-separated Telegram user IDs allowed to use the connector.
+# Leave empty to let anyone connect. Message the bot /start to see your ID.
+ALLOWED_USER_IDS=

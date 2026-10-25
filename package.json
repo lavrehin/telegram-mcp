@@ -1,0 +1,29 @@
+{
+  "name": "telegram-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "bun test",
+    "lint": "prettier . --ignore-path .gitignore --write --log-level warn && eslint . --fix && tsc --pretty && knip --no-progress",
+    "check": "prettier . --ignore-path .gitignore --check --log-level warn && eslint . && tsc --pretty && knip --no-progress"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261022.1",
+    "@eslint/js": "^10.0.1",
+    "@types/bun": "^1.4.3",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^10.13.0",
+    "knip": "^6.42.1",
+    "prettier": "^3.9.10",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "typescript-eslint": "^8.72.0",
+    "wrangler": "^4.151.3"
+  }
+}
